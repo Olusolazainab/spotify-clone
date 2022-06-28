@@ -33,7 +33,7 @@ function App() {
 				});
 			});
 
-			spotify.getUserPlaylists("37i9dQZEVXcJZyENOWUFo7").then((playlists) => {
+			spotify.getUserPlaylists().then((playlists) => {
 				dispatch({
 					type: 'SET_PLAYLISTS',
 					playlists: playlists,
