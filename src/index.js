@@ -1,18 +1,20 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
-import 'bootstrap/dist/css/bootstrap.min.css';
-import 'bootstrap/dist/js/bootstrap.min.js';
+import './index.css';
 import App from './App';
-import './index.css'
+import { DataLayer } from './components/DataLayer';
 import reportWebVitals from './reportWebVitals';
+import reducer, { initialState } from './reducer';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
 	<React.StrictMode>
-		<BrowserRouter>
-			<App />
-		</BrowserRouter>
+		<DataLayer initialState={initialState} reducer={reducer}>
+			<BrowserRouter>
+				<App />
+			</BrowserRouter>
+		</DataLayer>
 	</React.StrictMode>
 );
 

@@ -1,46 +1,56 @@
-import { Navbar } from './components/Navbar'
-import {Routes, Route} from 'react-router-dom'
-import { About } from './components/About';
-import { Home } from './components/Home';
-import { OrderSummary } from './components/OrderSummary';
-import { NoMatch } from './components/NoMatch';
-import { Products } from './components/Products';
-import { Featured } from './components/Featured';
-import { NewProducts } from './components/NewProducts';
-import { Users } from './components/Users';
-import { UserDetails } from './components/UserDetails';
-import { Admin } from './components/Admin';
-import { UserOne } from './components/UserOne';
-import { UserTwo } from './components/UserTwo';
-import { UserThree } from './components/UserThree';
+import React, { useEffect, useState } from 'react';
+import './App.css';
+import Login from './components/login/Login';
+import Player from './components/player/Player';
+import { getTokenFromUrl } from './spotify';
+import SpotifyWebApi from 'spotify-web-api-js';
+import { useDataLayerValue } from './components/DataLayer';
 
+const spotify = new SpotifyWebApi();
 
-function App() { 
+function App() {
+	const [{user, token}, dispatch] = useDataLayerValue();
 
-  
-  return (
-    <>
-    <Navbar />
-    <Routes>
-      <Route path='/' element={<Home />} />
-      <Route path='about' element={<About />} />
-      <Route path='order-summary' element={<OrderSummary />} />
-      <Route path='products' element={<Products />} >
-        <Route index element={<Featured />} />
-        <Route path='featured' element={<Featured />}/>
-        <Route path='new' element={<NewProducts />}/>
-      </Route>
-      <Route path='users' element={<Users />} >
-      <Route path=':userId' element={<UserDetails />}/>
-      <Route path='admin' element={<Admin />}/>
-      <Route path='user1' element={<UserOne />}/>
-      <Route path='user2' element={<UserTwo />}/>
-      <Route path='user3' element={<UserThree />}/> 
-      </Route>
-      <Route path='*' element={<NoMatch />} />
-    </Routes> 
-    </>
-  );
+	useEffect(() => {
+		const hash = getTokenFromUrl();
+		window.location.hash = '';
+		const _token = hash.access_token;
+
+		if (_token) {
+			
+			dispatch({
+				type: 'SET_TOKEN',
+				token: _token,
+			})
+
+			spotify.setAccessToken(_token);
+
+			spotify.getMe().then((user) => {
+				
+				dispatch({
+					type: 'SET_USER',
+					user: user,
+				});
+			});
+
+			spotify.getUserPlaylists("37i9dQZEVXcJZyENOWUFo7").then((playlists) => {
+				dispatch({
+					type: 'SET_PLAYLISTS',
+					playlists: playlists,
+				});
+			});
+
+			spotify.getPlaylist("37i9dQZEVXcJZyENOWUFo7").then((response) =>
+			dispatch({
+			  type: "SET_DISCOVER_WEEKLY",
+			  discover_weekly: response,
+			})
+		  );
+		} 
+	
+	}, []);
+
+	return <div>{token ? <Player spotify={spotify} /> : <Login />}</div>;
 }
 
 export default App;
